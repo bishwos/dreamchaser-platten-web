@@ -1,17 +1,255 @@
 ---
-
+import '../styles/global.css';
 ---
 
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platten | Real Estate Visualization & Energy Efficiency</title>
+  <meta name="description" content="Premium 3D house walkthroughs, floorplan generation, interior design, and energy efficiency analysis for real estate listing services.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav>
+    <div class="logo">PLATTEN</div>
+    <div class="nav-links">
+      <a href="#walkthroughs">Walkthroughs</a>
+      <a href="#interior">Interior</a>
+      <a href="#floorplans">Floorplans</a>
+      <a href="#efficiency">Energy</a>
+    </div>
+    <a href="#" class="btn" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">Get a Quote</a>
+  </nav>
+
+  <div class="canvas-container" id="canvas-container"></div>
+
+  <main>
+    <section id="hero" class="active">
+      <div class="content-wrapper">
+        <h1>High-End Real Estate Visualization.</h1>
+        <p>From sketches to sketches, 3D walkthroughs to energy ratings. We provide the complete digital twin stack for your properties.</p>
+        <a href="#walkthroughs" class="btn">Explore Services</a>
+      </div>
+      <div class="scroll-indicator">
+        <span>Scroll</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+      </div>
+    </section>
+
+    <section id="walkthroughs">
+      <div class="content-wrapper">
+        <h2>3D Walkthroughs.</h2>
+        <p>Convert 360 images into immersive, navigable 3D environments. Let buyers feel at home before they even step inside.</p>
+      </div>
+    </section>
+
+    <section id="interior">
+      <div class="content-wrapper">
+        <h2>Interior Design.</h2>
+        <p>Re-imagine every space. Our AI-driven design engine applies high-end finishes and furniture according to your client's unique tastes.</p>
+      </div>
+    </section>
+
+    <section id="floorplans">
+      <div class="content-wrapper">
+        <h2>Precision Floorplans.</h2>
+        <p>Transform hand-drawn sketches into professional, architectural-grade blueprints ready for listing services.</p>
+      </div>
+    </section>
+
+    <section id="efficiency">
+      <div class="content-wrapper">
+        <h2>Energy Efficiency.</h2>
+        <p>Automate thermal analysis and energy ratings. Increase property value with data-backed efficiency optimizations.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    import * as THREE from 'three';
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Three.js Setup
+    const container = document.querySelector('#canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    directionalLight.position.set(10, 20, 10);
+    scene.add(directionalLight);
+
+    const blueLight = new THREE.PointLight(0x6366f1, 5, 20);
+    blueLight.position.set(-5, 5, 5);
+    scene.add(blueLight);
+
+    const pinkLight = new THREE.PointLight(0xec4899, 5, 20);
+    pinkLight.position.set(5, -5, 5);
+    scene.add(pinkLight);
+
+    // Create a Modular House
+    const houseGroup = new THREE.Group();
+    scene.add(houseGroup);
+
+    // Textures
+    const textureLoader = new THREE.TextureLoader();
+    const interiorTexture = textureLoader.load('/premium_interior.png');
+    const energyTexture = textureLoader.load('/energy_efficiency.png');
+
+    // Materials
+    const wallMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x475569, // Brighter slate
+      roughness: 0.1, 
+      metalness: 0.5,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    const floorMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x1e293b, 
+      roughness: 0.8 
+    });
+
+    const interiorDesignMaterial = new THREE.MeshBasicMaterial({
+        map: interiorTexture,
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide
+    });
+
+    const energyAnalysisMaterial = new THREE.MeshBasicMaterial({
+        map: energyTexture,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+    });
+
+    // House Components
+    const floors = [];
+    const floorHeight = 1.6;
+
+    for (let i = 0; i < 3; i++) {
+      const floorGroup = new THREE.Group();
+      floorGroup.position.y = i * floorHeight;
+      
+      // Slab
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.1, 4.2), floorMaterial);
+      floorGroup.add(slab);
+
+      // Main Room Block
+      const walls = new THREE.Mesh(new THREE.BoxGeometry(4, floorHeight, 4), wallMaterial);
+      walls.position.y = floorHeight / 2;
+      floorGroup.add(walls);
+
+      // Feature Wall (for textures)
+      const featureWall = new THREE.Mesh(new THREE.PlaneGeometry(3.9, floorHeight * 0.9), interiorDesignMaterial);
+      featureWall.position.set(0, floorHeight / 2, 2.01);
+      floorGroup.add(featureWall);
+
+      // Energy Overlay
+      const energyWall = new THREE.Mesh(new THREE.PlaneGeometry(4.02, floorHeight * 1.02), energyAnalysisMaterial);
+      energyWall.position.set(0, floorHeight / 2, 2.02);
+      floorGroup.add(energyWall);
+
+      houseGroup.add(floorGroup);
+      floors.push(floorGroup);
+    }
+
+    // Roof
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(3.5, 2, 4), wallMaterial);
+    roof.rotation.y = Math.PI / 4;
+    roof.position.y = 3 * floorHeight + 1;
+    houseGroup.add(roof);
+
+    // Initial Position
+    houseGroup.position.x = 2; // Move it to the right to avoid overlapping text
+    camera.position.z = 12;
+    camera.position.y = 4;
+    camera.lookAt(0, 2, 0);
+
+    // Animation Logic
+    const sections = document.querySelectorAll('section');
+
+    // Timeline
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: 'main',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 1.5,
+      }
+    });
+
+    // 1. Walkthroughs (Separate floors)
+    tl.to(floors[1].position, { y: floorHeight + 3, ease: 'power2.inOut' }, 0);
+    tl.to(floors[2].position, { y: 2 * floorHeight + 6, ease: 'power2.inOut' }, 0);
+    tl.to(roof.position, { y: 3 * floorHeight + 9, ease: 'power2.inOut' }, 0);
+    tl.to(houseGroup.rotation, { y: Math.PI * 0.75, ease: 'none' }, 0.1);
+
+    // 2. Interior Design
+    tl.to(wallMaterial, { opacity: 0.2, duration: 2 }, 0.3);
+    tl.to(interiorDesignMaterial, { opacity: 1, duration: 2 }, 0.3);
+    tl.to(houseGroup.scale, { x: 1.1, y: 1.1, z: 1.1, duration: 2 }, 0.3);
+
+    // 3. Floorplans
+    tl.to(camera.position, { x: 0, y: 20, z: 0, duration: 3, ease: 'power3.inOut' }, 0.5);
+    tl.to(houseGroup.rotation, { x: -Math.PI / 2, y: 0, duration: 3 }, 0.5);
+    tl.to(interiorDesignMaterial, { opacity: 0, duration: 1 }, 0.5);
+
+    // 4. Energy Efficiency
+    tl.to(camera.position, { x: 8, y: 4, z: 8, duration: 2 }, 0.8);
+    tl.to(houseGroup.rotation, { x: 0, y: Math.PI / 4, duration: 2 }, 0.8);
+    tl.to(energyAnalysisMaterial, { opacity: 1, duration: 2 }, 0.8);
+    tl.to(wallMaterial, { color: 0x0f172a, duration: 2 }, 0.8);
+
+    // Renderer Resize Handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Render Loop
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Idle float
+      const time = performance.now() * 0.001;
+      houseGroup.position.y = Math.sin(time) * 0.2;
+      
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Section Observer for Active States
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+        } else {
+            entry.target.classList.remove('active');
+        }
+      });
+    }, { threshold: 0.5 });
+
+    sections.forEach(s => observer.observe(s));
+
+  </script>
+</body>
 </html>
